@@ -1,0 +1,299 @@
+@import 'tailwindcss';
+
+/* Niedrige Bildschirme (kleine Handys, Querformat): kompaktere Abstände. */
+@custom-variant short (@media (max-height: 640px));
+
+/* Zweispaltiges Layout: Desktop, iPad quer und Handy im Querformat. */
+@custom-variant wide {
+  @media (min-width: 1024px) {
+    @slot;
+  }
+  @media (orientation: landscape) and (max-height: 520px) and (min-width: 600px) {
+    @slot;
+  }
+}
+
+@theme {
+  --font-sans: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --color-ink-950: #08080d;
+  --color-ink-900: #0e0e16;
+  --color-ink-800: #161621;
+  --color-ink-700: #20202e;
+  --color-ink-600: #2c2c3d;
+
+  --color-paper: #f7f2e8;
+  --color-paper-dim: #e6dfd0;
+  --color-paper-line: #cfc6b4;
+  --color-paper-ink: #16141d;
+  --color-paper-muted: #5f5a68;
+
+  --color-brand: #ffd60a;
+  --color-brand-deep: #ffb300;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Farben, die sich je nach Kategorie bzw. Bewertung ändern. */
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-ink: var(--accent-ink);
+  --color-tone: var(--tone);
+}
+
+:root,
+[data-category='brand'] {
+  --accent: #ffd60a;
+  --accent-2: #ff7a59;
+  --accent-ink: #a16207;
+  --tone: #ffd60a;
+}
+[data-category='alltag'] {
+  --accent: #ff9440;
+  --accent-2: #ff5d5d;
+  --accent-ink: #c2410c;
+}
+[data-category='unterwegs'] {
+  --accent: #2ee59d;
+  --accent-2: #12b8c8;
+  --accent-ink: #0f766e;
+}
+[data-category='technik'] {
+  --accent: #38bdf8;
+  --accent-2: #5b7cff;
+  --accent-ink: #1d4ed8;
+}
+[data-category='amtlich'] {
+  --accent: #ff6bb5;
+  --accent-2: #c56bff;
+  --accent-ink: #a21caf;
+}
+[data-category='luxus'] {
+  --accent: #f5cd5e;
+  --accent-2: #ef9a2e;
+  --accent-ink: #a16207;
+}
+
+[data-rating='perfect'],
+[data-rating='great'] {
+  --tone: #34d399;
+}
+[data-rating='good'] {
+  --tone: #a3e635;
+}
+[data-rating='ok'] {
+  --tone: #fbbf24;
+}
+[data-rating='far'] {
+  --tone: #fb923c;
+}
+[data-rating='miss'] {
+  --tone: #fb7185;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    background: var(--color-ink-950);
+    color: #f4f4f7;
+    font-family: var(--font-sans);
+    font-optical-sizing: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  button,
+  a {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+
+  button:not(:disabled),
+  [role='slider']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-brand) 60%, transparent);
+    color: var(--color-ink-950);
+  }
+}
+
+@layer components {
+  /* Kleine Versal-Beschriftung in Monospace. */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* Zahlen, die sich live ändern, sollen nicht zappeln. */
+  .numeric {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* ── Hintergrund ─────────────────────────────────────────── */
+  .backdrop-glow {
+    background:
+      radial-gradient(70% 55% at 12% -5%, color-mix(in oklab, var(--accent) 30%, transparent), transparent 70%),
+      radial-gradient(60% 50% at 105% 105%, color-mix(in oklab, var(--accent-2) 26%, transparent), transparent 70%);
+  }
+
+  .backdrop-dots {
+    background-image: radial-gradient(rgb(255 255 255 / 0.07) 1px, transparent 1.5px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 20%, transparent 78%);
+  }
+
+  /* ── Preisschild ─────────────────────────────────────────── */
+  .tag-shadow {
+    filter: drop-shadow(0 22px 32px rgb(0 0 0 / 0.5)) drop-shadow(0 2px 4px rgb(0 0 0 / 0.3));
+  }
+
+  .tag {
+    --hole: 0.44rem;
+    --hole-y: 1.4rem;
+    --notch: 0.6rem;
+    --stub: 5.5rem;
+    background: linear-gradient(180deg, #fbf7ef 0%, var(--color-paper) 55%, #f1ebde 100%);
+    color: var(--color-paper-ink);
+    border-radius: 2rem 2rem 1.6rem 1.6rem;
+    /* Lochung oben und zwei Einkerbungen an der Abrisskante. */
+    mask:
+      radial-gradient(circle var(--hole) at 50% var(--hole-y), #0000 calc(100% - 1px), #000),
+      radial-gradient(circle var(--notch) at 0 calc(100% - var(--stub)), #0000 calc(100% - 1px), #000),
+      radial-gradient(circle var(--notch) at 100% calc(100% - var(--stub)), #0000 calc(100% - 1px), #000);
+    mask-composite: intersect;
+  }
+
+  .tag-eyelet {
+    position: absolute;
+    left: 50%;
+    top: var(--hole-y);
+    width: calc(var(--hole) * 2 + 0.6rem);
+    height: calc(var(--hole) * 2 + 0.6rem);
+    translate: -50% -50%;
+    border-radius: 999px;
+    border: 2px solid var(--color-paper-line);
+    opacity: 0.8;
+  }
+
+  .tag-stub {
+    height: var(--stub);
+    margin-inline: 1.1rem;
+    border-top: 2px dashed var(--color-paper-line);
+  }
+
+  @media (max-height: 640px) {
+    .tag {
+      --stub: 5rem;
+      --hole-y: 1.15rem;
+      border-radius: 1.5rem 1.5rem 1.25rem 1.25rem;
+    }
+  }
+
+  /* ── Kassenbon ───────────────────────────────────────────── */
+  .receipt {
+    --tooth: 14px;
+    background: linear-gradient(180deg, #fbf7ef, var(--color-paper));
+    color: var(--color-paper-ink);
+    border-radius: 0.5rem 0.5rem 0 0;
+    padding-bottom: calc(var(--tooth) / 2 + 1.25rem);
+    /* Gezackte Abrisskante unten. */
+    mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / var(--tooth) 100%;
+  }
+
+  .receipt-rule {
+    border-top: 2px dashed var(--color-paper-line);
+  }
+
+  .barcode {
+    height: 2.5rem;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--color-paper-ink) 0 2px,
+      transparent 2px 4px,
+      var(--color-paper-ink) 4px 5px,
+      transparent 5px 9px,
+      var(--color-paper-ink) 9px 12px,
+      transparent 12px 14px
+    );
+  }
+
+  /* ── Dialog ──────────────────────────────────────────────── */
+  dialog.sheet {
+    margin: auto auto 0;
+    width: 100%;
+    max-width: 34rem;
+    max-height: min(92dvh, 46rem);
+    border: 0;
+    padding: 0;
+    background: var(--color-ink-800);
+    color: inherit;
+    border-radius: 1.75rem 1.75rem 0 0;
+    box-shadow: 0 -20px 60px rgb(0 0 0 / 0.6);
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  dialog.sheet[open] {
+    animation: sheet-in 0.36s var(--ease-out-expo);
+  }
+
+  dialog.sheet::backdrop {
+    background: rgb(4 4 8 / 0.72);
+    animation: fade-in 0.25s ease-out;
+  }
+
+  @media (min-width: 640px) and (min-height: 560px) {
+    dialog.sheet {
+      margin: auto;
+      border-radius: 1.75rem;
+    }
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(2.5rem);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-soft {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.sheet[open],
+  dialog.sheet::backdrop {
+    animation: none;
+  }
+}
