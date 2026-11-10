@@ -4,6 +4,7 @@ import { CATEGORIES } from '../data/questions';
 import { formatAsOf, formatPrice } from '../game/format';
 import { roundToSignificant } from '../game/scale';
 import type { PriceQuestion } from '../game/types';
+import { setDigits } from './Digits';
 import { ExternalIcon } from './Icons';
 
 export interface CardReveal {
@@ -34,7 +35,7 @@ export function QuestionCard({ question, counter, reveal }: QuestionCardProps) {
           <span className="label text-paper-muted">{counter}</span>
         </header>
 
-        <div className="flex flex-1 flex-col items-center justify-center gap-[clamp(0.5rem,1.8dvh,1.25rem)] px-6 py-3 text-center short:flex-row short:gap-3.5 short:px-4 short:py-2 short:text-left">
+        <div className="flex flex-1 flex-col items-center justify-center gap-[clamp(0.5rem,1.8dvh,1.25rem)] px-6 py-2 text-center short:flex-row short:gap-3.5 short:px-4 short:py-2 short:text-left">
           <motion.div
             aria-hidden="true"
             className="grid size-[clamp(3.75rem,11dvh,7.5rem)] shrink-0 place-items-center rounded-[28%] bg-linear-to-br from-accent/30 to-accent-2/30 text-[clamp(2.1rem,6.4dvh,4.4rem)] leading-none short:size-14 short:text-[2rem]"
@@ -111,7 +112,7 @@ function RevealedPrice({ actual, reveal }: { actual: number; reveal: CardReveal 
     if (!node.current) return;
     // Geometrisch interpolieren – passt zur logarithmischen Skala des Sliders.
     const value = p >= 1 ? actual : roundToSignificant(guess * Math.pow(actual / guess, p), 3, 'round');
-    node.current.textContent = formatPrice(value);
+    setDigits(node.current, formatPrice(value));
   };
 
   useMotionValueEvent(progress, 'change', render);
@@ -119,13 +120,15 @@ function RevealedPrice({ actual, reveal }: { actual: number; reveal: CardReveal 
 
   return (
     <motion.p
-      className="numeric text-[clamp(1.9rem,8.5vw,2.75rem)] font-extrabold leading-none tracking-[-0.03em] short:text-3xl wide:text-[2.75rem]"
+      className="text-[clamp(1.9rem,8.5vw,2.75rem)] font-extrabold leading-none tracking-[-0.03em] short:text-3xl wide:text-[2.75rem]"
       animate={settled ? { scale: [1, 1.16, 1], color: ['#16141d', 'var(--accent-ink)', '#16141d'] } : { scale: 1 }}
       transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      aria-live="polite"
     >
-      <span className="sr-only">Echter Preis: </span>
-      <span ref={node} />
+      <span ref={node} aria-hidden="true" />
+      {/* Für Screenreader erst vorlesen, wenn der Preis feststeht. */}
+      <span className="sr-only" role="status">
+        {settled ? `Echter Preis: ${formatPrice(actual)}` : ''}
+      </span>
     </motion.p>
   );
 }

@@ -106,7 +106,8 @@ export function SummaryScreen({
               duration={1.6}
               delay={0.3}
               format={formatPoints}
-              className="numeric text-[clamp(3.5rem,17vw,5.5rem)] font-extrabold leading-none tracking-[-0.05em] text-brand"
+              fixedDigits
+              className="text-[clamp(3.5rem,17vw,5.5rem)] font-extrabold leading-none tracking-[-0.05em] text-brand"
             />
             <span className="text-left text-sm leading-tight text-white/55">
               von {formatPoints(maxTotal)}

@@ -25,13 +25,13 @@ interface HeroTag {
 }
 
 const HERO_TAGS: readonly HeroTag[] = [
-  { emoji: '🚆', name: 'Deutschlandticket', category: 'unterwegs', x: '-62%', y: '9%', rotate: -11, float: 4.2 },
-  { emoji: '🍺', name: 'Wiesn-Maß', category: 'alltag', x: '62%', y: '11%', rotate: 12, float: 4.8 },
-  { emoji: '📱', name: 'iPhone 18 Pro', category: 'technik', x: '0%', y: '-4%', rotate: 2, float: 3.6 },
+  { emoji: '🚆', name: 'Bahnticket', category: 'unterwegs', x: '-80%', y: '7%', rotate: -11, float: 4.2 },
+  { emoji: '🍺', name: 'Wiesn-Maß', category: 'alltag', x: '80%', y: '9%', rotate: 12, float: 4.8 },
+  { emoji: '📱', name: 'iPhone 18 Pro', category: 'technik', x: '0%', y: '-5%', rotate: 2, float: 3.6 },
 ];
 
 const miniTag = {
-  '--stub': '2.9rem',
+  '--stub': '2.7rem',
   '--hole': '0.3rem',
   '--hole-y': '0.95rem',
   '--notch': '0.4rem',
@@ -62,16 +62,16 @@ export function StartScreen({ best, onStart }: StartScreenProps) {
         )}
       </header>
 
-      <div className="flex flex-1 flex-col justify-center gap-[clamp(1rem,3dvh,3rem)] py-4 short:py-3 wide:flex-row-reverse wide:items-center wide:gap-16">
+      <div className="flex flex-1 flex-col justify-center gap-[clamp(1.25rem,3.5dvh,3rem)] py-3 wide:flex-row-reverse wide:items-center wide:gap-16">
         {/* Fächer aus Preisschildern */}
         <div
           aria-hidden="true"
-          className="relative mx-auto max-h-64 min-h-36 w-full max-w-sm flex-1 short:hidden wide:block wide:h-80 wide:max-h-none wide:max-w-md short:wide:hidden"
+          className="relative mx-auto max-h-64 min-h-40 w-full max-w-sm flex-1 short:hidden sm:max-h-80 sm:min-h-72 sm:max-w-md wide:h-80 wide:flex-1"
         >
           {HERO_TAGS.map((tag, index) => (
             <motion.div
               key={tag.name}
-              className="absolute left-1/2 top-1/2 -ml-[3.4rem] -mt-[4.75rem] w-[6.8rem] wide:-ml-[4.75rem] wide:-mt-[6.5rem] wide:w-[9.5rem]"
+              className="absolute left-1/2 top-1/2 -ml-[3.25rem] -mt-[4.4rem] w-[6.5rem] sm:-ml-[4.75rem] sm:-mt-[6.5rem] sm:w-[9.5rem]"
               initial={{ opacity: 0, x: '0%', y: '-70%', rotate: 0, scale: 0.7 }}
               animate={{ opacity: 1, x: tag.x, y: tag.y, rotate: tag.rotate, scale: 1 }}
               transition={{ type: 'spring', stiffness: 140, damping: 13, delay: 0.15 + index * 0.1 }}
@@ -81,15 +81,15 @@ export function StartScreen({ best, onStart }: StartScreenProps) {
                 animate={{ y: [0, -7, 0], rotate: [0, index % 2 ? 1.5 : -1.5, 0] }}
                 transition={{ duration: tag.float, repeat: Infinity, ease: 'easeInOut', delay: 1 + index * 0.3 }}
               >
-                <div className="tag flex h-[9.5rem] flex-col wide:h-[13rem]" data-category={tag.category} style={miniTag}>
+                <div className="tag flex h-[8.8rem] flex-col sm:h-[13rem]" data-category={tag.category} style={miniTag}>
                   <div className="flex flex-1 flex-col items-center justify-end gap-1 px-2 pb-2 pt-7">
-                    <span className="text-[2.5rem] leading-none wide:text-6xl">{tag.emoji}</span>
-                    <span className="max-w-full truncate text-[0.6875rem] font-bold tracking-[-0.01em] text-paper-ink wide:text-sm">
+                    <span className="text-[2.5rem] leading-none sm:text-6xl">{tag.emoji}</span>
+                    <span className="max-w-full truncate text-[0.6875rem] font-bold tracking-[-0.01em] text-paper-ink sm:text-sm">
                       {tag.name}
                     </span>
                   </div>
                   <div className="tag-stub mx-2! flex items-center justify-center">
-                    <span className="numeric text-xl font-extrabold text-accent-ink wide:text-3xl">?&thinsp;€</span>
+                    <span className="numeric text-xl font-extrabold text-accent-ink sm:text-3xl">?&thinsp;€</span>
                   </div>
                 </div>
               </motion.div>
@@ -104,23 +104,23 @@ export function StartScreen({ best, onStart }: StartScreenProps) {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
         >
           <p className="label text-brand">Spielmodus 01</p>
-          <h1 className="mt-3 text-[clamp(3.25rem,15.5vw,6rem)] font-extrabold leading-[0.9] tracking-[-0.05em] short:mt-2 short:text-5xl wide:text-[clamp(4.5rem,8vw,7.5rem)]">
+          <h1 className="mt-3 text-[clamp(3.25rem,15.5vw,6rem)] font-extrabold leading-[0.9] tracking-[-0.045em] short:mt-2 short:text-5xl wide:text-[clamp(4.5rem,8vw,7.5rem)] wide:tracking-[-0.035em] short:wide:text-5xl">
             Was kostet
             <br />
             das<span className="text-brand">?</span>
           </h1>
-          <p className="mt-5 max-w-md text-pretty text-[1.0625rem] leading-relaxed text-white/65 short:mt-3 short:text-base sm:text-lg">
+          <p className="mt-5 max-w-md text-pretty text-[1.0625rem] leading-relaxed text-white/65 short:mt-2 short:max-w-xl short:text-[0.9375rem] short:leading-snug sm:text-lg short:sm:text-[0.9375rem]">
             Zehn Dinge, zehn Schätzungen. Vom Briefporto bis zum Bugatti – wie gut ist dein Preisgefühl?
           </p>
 
-          <div className="mt-8 hidden flex-col gap-3 wide:flex wide:max-w-sm">
+          <div className="mt-8 hidden max-w-sm flex-col gap-2 short:mt-3 short:max-w-lg short:flex-row sm:flex">
             <StartActions onStart={onStart} onRules={() => setRulesOpen(true)} />
           </div>
         </motion.div>
       </div>
 
       <motion.footer
-        className="flex shrink-0 flex-col gap-1.5 wide:hidden"
+        className="flex shrink-0 flex-col gap-1.5 sm:hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
@@ -128,8 +128,8 @@ export function StartScreen({ best, onStart }: StartScreenProps) {
         <StartActions onStart={onStart} onRules={() => setRulesOpen(true)} />
       </motion.footer>
 
-      <p className="label mt-3 shrink-0 text-center text-white/40 short:mt-2 wide:mt-0 wide:text-left">
-        {ROUNDS_PER_GAME} Runden · ca. 3 Minuten · {QUESTIONS.length} Preise mit Quelle
+      <p className="label mt-3 shrink-0 text-center text-white/40 short:mt-2 sm:text-left">
+        {ROUNDS_PER_GAME} Runden · 3 Min. · {QUESTIONS.length} belegte Preise
       </p>
 
       <RulesSheet open={rulesOpen} onClose={() => setRulesOpen(false)} />

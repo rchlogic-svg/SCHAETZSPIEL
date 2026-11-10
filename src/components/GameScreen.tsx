@@ -21,7 +21,7 @@ export function GameScreen({ game }: { game: Game }) {
 
   return (
     <motion.main
-      className="mx-auto flex min-h-dvh w-full max-w-xl flex-col gap-3 px-[max(1rem,env(safe-area-inset-left))] pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:gap-5 sm:px-6 sm:pb-8 sm:pt-6 wide:h-dvh wide:max-w-5xl wide:px-8"
+      className="mx-auto flex min-h-dvh w-full max-w-xl flex-col gap-2.5 px-[max(1rem,env(safe-area-inset-left))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:gap-5 sm:px-6 sm:pb-8 sm:pt-6 wide:h-dvh wide:max-w-5xl wide:px-8"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

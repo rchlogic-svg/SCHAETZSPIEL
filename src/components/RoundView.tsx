@@ -5,6 +5,7 @@ import { initialValue, nudgeValue } from '../game/scale';
 import type { Round, RoundResult } from '../game/types';
 import { celebrate, haptic } from '../lib/effects';
 import { Button } from './Button';
+import { Digits } from './Digits';
 import { ArrowRightIcon, MinusIcon, PlusIcon } from './Icons';
 import { PriceSlider } from './PriceSlider';
 import { QuestionCard } from './QuestionCard';
@@ -88,10 +89,10 @@ export function RoundView({ round, index, roundCount, result, settled, onSubmit,
   const reveal = result ? { progress, settled } : undefined;
 
   return (
-    <div className="flex flex-1 flex-col justify-center gap-3 sm:gap-5 wide:min-h-0 wide:flex-row wide:items-center wide:gap-[clamp(1.5rem,4vw,4rem)]">
+    <div className="flex flex-1 flex-col justify-center gap-2.5 sm:gap-5 wide:min-h-0 wide:flex-row wide:items-center wide:gap-[clamp(1.5rem,4vw,4rem)]">
       {/* Das Preisschild schwingt wie an einer Schnur herein. */}
       <motion.div
-        className="flex max-h-[30rem] flex-1 flex-col sm:max-h-[34rem] wide:my-auto wide:max-h-[min(34rem,100%)] wide:self-stretch"
+        className="flex max-h-[30rem] flex-1 flex-col sm:max-h-[34rem] wide:h-[min(32rem,100%)] wide:max-h-none"
         style={{ transformOrigin: '50% 0%' }}
         initial={{ opacity: 0, y: -36, rotate: -7 }}
         animate={{ opacity: 1, y: 0, rotate: 0 }}
@@ -115,7 +116,7 @@ export function RoundView({ round, index, roundCount, result, settled, onSubmit,
         exit={{ opacity: 0, y: 16, transition: { duration: 0.2 } }}
         transition={{ duration: 0.45, ease: EASE_OUT, delay: 0.08 }}
       >
-        <div className="relative h-[4.75rem] short:h-16 sm:h-24">
+        <div className="relative h-[4.5rem] short:h-[3.75rem] sm:h-24">
           <AnimatePresence initial={false} mode="wait">
             {result && settled ? (
               <RevealPanel key="result" result={result} />
@@ -128,11 +129,12 @@ export function RoundView({ round, index, roundCount, result, settled, onSubmit,
               >
                 <span className="label text-white/50">{result ? 'Dein Tipp' : 'Deine Schätzung'}</span>
                 <output
-                  className={`numeric text-[clamp(2.25rem,11vw,3.5rem)] font-extrabold leading-none tracking-[-0.035em] transition-colors duration-300 short:text-4xl wide:text-[3.25rem] ${
+                  aria-label={formatPrice(guess)}
+                  className={`text-[clamp(2.25rem,11vw,3.5rem)] font-extrabold leading-none tracking-[-0.035em] transition-colors duration-300 short:text-4xl wide:text-[3.25rem] short:wide:text-4xl ${
                     result ? 'text-white/55' : 'text-white'
                   }`}
                 >
-                  {formatPrice(guess)}
+                  <Digits text={formatPrice(guess)} />
                 </output>
               </motion.div>
             )}

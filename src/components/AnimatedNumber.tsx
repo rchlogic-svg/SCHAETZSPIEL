@@ -1,5 +1,6 @@
 import { animate, useReducedMotion } from 'motion/react';
 import { useLayoutEffect, useRef } from 'react';
+import { setDigits } from './Digits';
 
 interface AnimatedNumberProps {
   value: number;
@@ -8,6 +9,8 @@ interface AnimatedNumberProps {
   from?: number;
   duration?: number;
   delay?: number;
+  /** Ziffern in gleich breiten Zellen – für große, zentrierte Zahlen. */
+  fixedDigits?: boolean;
   className?: string;
 }
 
@@ -21,6 +24,7 @@ export function AnimatedNumber({
   from,
   duration = 0.9,
   delay = 0,
+  fixedDigits = false,
   className,
 }: AnimatedNumberProps) {
   const node = useRef<HTMLSpanElement>(null);
@@ -31,29 +35,34 @@ export function AnimatedNumber({
     const element = node.current;
     if (!element) return;
 
+    const write = (text: string) => {
+      if (fixedDigits) setDigits(element, text);
+      else element.textContent = text;
+    };
+
     const start = shown.current;
     if (reduceMotion || start === value) {
       shown.current = value;
-      element.textContent = format(value);
+      write(format(value));
       return;
     }
 
-    element.textContent = format(Math.round(start));
+    write(format(Math.round(start)));
     const controls = animate(start, value, {
       duration,
       delay,
       ease: [0.16, 1, 0.3, 1],
       onUpdate: (latest) => {
         shown.current = latest;
-        element.textContent = format(Math.round(latest));
+        write(format(Math.round(latest)));
       },
       onComplete: () => {
         shown.current = value;
-        element.textContent = format(value);
+        write(format(value));
       },
     });
     return () => controls.stop();
-  }, [value, format, duration, delay, reduceMotion]);
+  }, [value, format, duration, delay, fixedDigits, reduceMotion]);
 
   return <span ref={node} className={className} />;
 }

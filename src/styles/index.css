@@ -148,7 +148,14 @@
   /* Zahlen, die sich live ändern, sollen nicht zappeln. */
   .numeric {
     font-variant-numeric: tabular-nums;
-    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Gleich breite Ziffernzelle, siehe components/Digits.tsx. */
+  .digit {
+    display: inline-block;
+    width: 0.63em;
+    letter-spacing: 0;
+    text-align: center;
   }
 
   /* ── Hintergrund ─────────────────────────────────────────── */
@@ -173,7 +180,7 @@
     --hole: 0.44rem;
     --hole-y: 1.4rem;
     --notch: 0.6rem;
-    --stub: 5.5rem;
+    --stub: 5.25rem;
     background: linear-gradient(180deg, #fbf7ef 0%, var(--color-paper) 55%, #f1ebde 100%);
     color: var(--color-paper-ink);
     border-radius: 2rem 2rem 1.6rem 1.6rem;
