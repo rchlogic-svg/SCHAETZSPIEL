@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatAsOf, formatAxis, formatDeviation, formatPoints, formatPrice } from './format';
+import { formatAsOf, formatAxis, formatDeviation, formatPoints, formatPrice, formatSavedAgo } from './format';
 
 /** Geschützte Leerzeichen für lesbare Erwartungswerte durch normale ersetzen. */
 const plain = (text: string) => text.replace(/ /g, ' ');
@@ -54,6 +54,24 @@ describe('formatDeviation', () => {
     expect(plain(formatDeviation(0.002))).toBe('unter 1 %');
     expect(plain(formatDeviation(25))).toBe('über 999 %');
     expect(plain(formatDeviation(Number.POSITIVE_INFINITY))).toBe('über 999 %');
+  });
+});
+
+describe('formatSavedAgo', () => {
+  const now = Date.UTC(2026, 10, 10, 12, 0, 0);
+  const minute = 60_000;
+
+  it('beschreibt, wie lange ein Spielstand her ist', () => {
+    expect(formatSavedAgo(now - 20_000, now)).toBe('gerade eben');
+    expect(formatSavedAgo(now - minute, now)).toBe('vor 1 Minute');
+    expect(formatSavedAgo(now - 5 * minute, now)).toBe('vor 5 Minuten');
+    expect(formatSavedAgo(now - 59 * minute, now)).toBe('vor 59 Minuten');
+    expect(formatSavedAgo(now - 60 * minute, now)).toBe('vor 1 Stunde');
+    expect(formatSavedAgo(now - 23 * 60 * minute, now)).toBe('vor 23 Stunden');
+  });
+
+  it('kommt mit Zeitpunkten in der Zukunft zurecht', () => {
+    expect(formatSavedAgo(now + 3 * minute, now)).toBe('gerade eben');
   });
 });
 

@@ -16,7 +16,9 @@ export type GameAction =
   | { type: 'start'; rounds: Round[] }
   | { type: 'submit'; guess: number }
   | { type: 'next' }
-  | { type: 'home' };
+  | { type: 'home' }
+  /** Setzt einen gespeicherten, bereits geprüften Spielstand fort. */
+  | { type: 'restore'; state: GameState };
 
 export const initialState: GameState = {
   phase: 'start',
@@ -57,5 +59,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'home':
       return initialState;
+
+    case 'restore':
+      return action.state.phase === 'start' || action.state.rounds.length === 0 ? state : action.state;
   }
 }

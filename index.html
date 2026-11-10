@@ -46,6 +46,21 @@
       .boot-notice {
         max-width: 26rem;
       }
+      .boot-reload {
+        min-height: 3rem;
+        padding: 0 1.5rem;
+        border: 0;
+        border-radius: 0.875rem;
+        background: #2545d8;
+        color: #fff;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .boot-reload:focus-visible {
+        outline: 2px solid #2545d8;
+        outline-offset: 2px;
+      }
       @keyframes boot-pulse {
         50% {
           opacity: 0.45;
@@ -55,6 +70,10 @@
         html {
           background: #0c0e12;
           color: #bcc3cf;
+        }
+        .boot-reload {
+          background: #93a5ff;
+          color: #0c0e12;
         }
       }
       @media (prefers-reduced-motion: reduce) {
@@ -78,6 +97,26 @@
         <p id="boot-text">Schätzspiel wird geladen …</p>
       </div>
     </div>
+    <script>
+      // Startet das Spiel nicht (z. B. abgebrochene Verbindung), bleibt die
+      // Ladeanzeige nicht endlos stehen: Nach 12 Sekunden gibt es einen Hinweis.
+      setTimeout(function () {
+        var text = document.getElementById('boot-text');
+        if (!text || !text.isConnected) return;
+        text.textContent =
+          'Das Laden dauert ungewöhnlich lange. Prüfe deine Internetverbindung und lade die Seite neu. Dein Spielstand bleibt erhalten.';
+        text.className = 'boot-notice';
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'boot-reload';
+        button.textContent = 'Seite neu laden';
+        button.onclick = function () {
+          location.reload();
+        };
+        text.after(button);
+        document.querySelector('.boot-mark').style.animation = 'none';
+      }, 12000);
+    </script>
     <noscript>
       <style>
         #boot-text {

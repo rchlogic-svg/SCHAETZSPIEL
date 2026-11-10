@@ -72,6 +72,20 @@ describe('gameReducer', () => {
     expect(gameReducer(revealed, { type: 'home' })).toEqual(initialState);
   });
 
+  it('setzt einen gespeicherten Spielstand unverändert fort', () => {
+    const revealed = gameReducer(started(), { type: 'submit', guess: 1 });
+    const restored = gameReducer(initialState, { type: 'restore', state: revealed });
+    expect(restored).toBe(revealed);
+    expect(restored.phase).toBe('revealed');
+    expect(restored.results).toHaveLength(1);
+  });
+
+  it('ignoriert leere oder unfertige Spielstände beim Fortsetzen', () => {
+    expect(gameReducer(initialState, { type: 'restore', state: initialState })).toBe(initialState);
+    const empty: GameState = { phase: 'guessing', rounds: [], index: 0, results: [] };
+    expect(gameReducer(initialState, { type: 'restore', state: empty })).toBe(initialState);
+  });
+
   it('beginnt ein neues Spiel mit leeren Ergebnissen', () => {
     const revealed = gameReducer(started(), { type: 'submit', guess: 1 });
     const again = gameReducer(revealed, { type: 'start', rounds });

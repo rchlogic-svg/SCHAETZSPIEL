@@ -99,6 +99,25 @@ Empfehlung: **Cloudflare**. Einrichtung in etwa fünf Minuten:
 Danach wird jede Änderung auf dem Hauptzweig automatisch veröffentlicht. Die Tarifbedingungen
 der Anbieter ändern sich; vor dem Start lohnt ein Blick auf die aktuellen Preisseiten.
 
+## Spielstand und Stabilität
+
+- **Automatisch gespeichert:** Nach jeder Aktion und bei jeder Reglerbewegung (gebündelt), außerdem
+  sofort, wenn die App in den Hintergrund geht. Gespeichert werden auch die Fragen samt Preisen vom
+  Spielbeginn – spätere Preisänderungen verschieben keine bereits erzielten Punkte.
+- **Fortsetzen:** Nach Neuladen oder erneutem Öffnen bietet die Startseite eine Karte
+  „Unterbrochenes Spiel“ bzw. „Letztes Ergebnis“ mit Weiterspielen und Verwerfen (mit Rückfrage).
+- **Verfall:** 24 Stunden nach der letzten Aktion wird ein Spielstand verworfen.
+- **Zurück-Taste / Wischgeste:** Im Spiel und auf der Ergebnisseite führt sie zur Startseite; das
+  Spiel bleibt gespeichert. Auf der Startseite verlässt sie die App wie gewohnt.
+- **Beenden:** Das X im Spiel (mit Rückfrage) und „Startseite“ auf der Ergebnisseite löschen den Stand.
+- **Fehler:** Programmfehler – auch in Klicks – führen zum Fehlerbildschirm. Nach „Seite neu laden“
+  geht es beim zuletzt sicher gespeicherten Stand weiter. Lädt das Programm gar nicht, erscheint nach
+  12 Sekunden ein Hinweis mit Neu-laden-Knopf.
+- **Speicher gesperrt** (z. B. privater Modus): Das Spiel läuft, nur ohne Speichern.
+
+Technisch: `src/game/savedGame.ts` (Format, strenge Prüfung, Verfall), `src/game/useGame.ts`
+(automatisches Speichern), `src/lib/backNavigation.ts` (Zurück-Taste), `src/lib/useErrorTrap.ts`.
+
 ## Designsystem „Papier & Tinte“
 
 Die Gestaltung ist in `src/styles/index.css` festgelegt und gilt für alle Bildschirme.
@@ -136,7 +155,8 @@ src/
     summary.ts           Höhepunkte eines Spiels (bester Tipp, größter Ausreißer)
     format.ts            Preise, Punkte und Datum in deutscher Schreibweise
     storage.ts           Bestwert und gesehene Fragen im Browser
-  lib/                   Kleine Hilfen: Animation, „Bewegung reduzieren“, Vibration
+    savedGame.ts         Laufendes Spiel speichern, prüfen und wiederherstellen
+  lib/                   Kleine Hilfen: Animation, Zurück-Taste, Fehlerabfang, „Bewegung reduzieren“
   components/            Oberfläche: Start, Spielrunde, Regler, Preisschild, Auswertung
   styles/index.css       Designsystem: Farben, Schrift, Radien, Bewegung, Preisschild
 ```

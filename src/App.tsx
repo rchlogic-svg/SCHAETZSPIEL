@@ -4,6 +4,7 @@ import { RulesSheet } from './components/RulesSheet';
 import { StartScreen } from './components/StartScreen';
 import { SummaryScreen } from './components/SummaryScreen';
 import { useGame } from './game/useGame';
+import { useBackNavigation } from './lib/backNavigation';
 
 export function App() {
   const game = useGame();
@@ -13,6 +14,10 @@ export function App() {
   const [rulesOpen, setRulesOpen] = useState(false);
   const openRules = useCallback(() => setRulesOpen(true), []);
   const closeRules = useCallback(() => setRulesOpen(false), []);
+
+  // Zurück-Taste im Spiel und auf der Ergebnisseite: zur Startseite, das Spiel
+  // bleibt gespeichert und lässt sich dort fortsetzen.
+  useBackNavigation(game.phase !== 'start', game.leave);
 
   // Beim allerersten Laden bleibt der Fokus, wo der Browser ihn setzt. Danach
   // bekommt bei jedem Bildschirmwechsel die neue Überschrift den Fokus.
@@ -31,8 +36,11 @@ export function App() {
       {game.phase === 'start' && (
         <StartScreen
           best={game.best}
+          resumable={game.resumable}
           focusHeading={!firstScreen.current}
           onStart={game.start}
+          onResume={game.resume}
+          onDiscard={game.discard}
           onHelp={openRules}
         />
       )}
@@ -45,7 +53,7 @@ export function App() {
           previousBest={game.previousBest}
           isNewBest={game.isNewBest}
           onReplay={game.start}
-          onHome={game.home}
+          onHome={game.quit}
           onHelp={openRules}
         />
       )}

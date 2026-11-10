@@ -28,6 +28,10 @@ interface RoundViewProps {
   /** Wahr, sobald die Enthüllung zu Ende gelaufen ist. */
   settled: boolean;
   isLastRound: boolean;
+  /** Gespeicherte Reglerstellung, wenn ein unterbrochenes Spiel fortgesetzt wird. */
+  initialGuess?: number;
+  /** Meldet jede Reglerbewegung, damit sie gespeichert werden kann. */
+  onGuessChange: (guess: number) => void;
   onSubmit: (guess: number) => void;
   onSettled: () => void;
   onNext: () => void;
@@ -38,22 +42,38 @@ interface RoundViewProps {
  * Was wird geschätzt (Preisschild), was ist zu tun (Hinweis über dem Betrag),
  * wie weit ist man (Kopfzeile) und wie gibt man ab (Button ganz unten).
  */
-export function RoundView({ round, result, settled, isLastRound, onSubmit, onSettled, onNext }: RoundViewProps) {
+export function RoundView({
+  round,
+  result,
+  settled,
+  isLastRound,
+  initialGuess,
+  onGuessChange,
+  onSubmit,
+  onSettled,
+  onNext,
+}: RoundViewProps) {
   const { question, range } = round;
-  const [guess, setGuess] = useState(() => initialValue(range));
-  const [touched, setTouched] = useState(false);
+  const [guess, setGuess] = useState(() => result?.guess ?? initialGuess ?? initialValue(range));
+  const [touched, setTouched] = useState(initialGuess !== undefined);
   const reduceMotion = useReducedMotion();
+  /** Wurde die Runde bereits aufgedeckt geladen (Spiel fortgesetzt), entfällt die Enthüllung. */
+  const restoredRevealed = useRef(result !== undefined);
 
   const root = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const nextButton = useRef<HTMLButtonElement>(null);
   /** Fortschritt der Enthüllung, 0–1. */
-  const progress = useMemo(() => createSignal(0), []);
+  const progress = useMemo(() => createSignal(restoredRevealed.current ? 1 : 0), []);
 
-  const changeGuess = useCallback((value: number) => {
-    setGuess(value);
-    setTouched(true);
-  }, []);
+  const changeGuess = useCallback(
+    (value: number) => {
+      setGuess(value);
+      setTouched(true);
+      onGuessChange(value);
+    },
+    [onGuessChange],
+  );
 
   const submit = () => {
     if (!touched || result) return;
@@ -75,7 +95,7 @@ export function RoundView({ round, result, settled, isLastRound, onSubmit, onSet
   // Enthüllung: Der Preis zählt vom Tipp zum echten Wert. Je weiter der Tipp
   // daneben liegt, desto länger dauert es – das hält die Spannung.
   useEffect(() => {
-    if (!result) return;
+    if (!result || restoredRevealed.current) return;
 
     if (reduceMotion) {
       progress.set(1);
@@ -118,7 +138,7 @@ export function RoundView({ round, result, settled, isLastRound, onSubmit, onSet
     <div
       ref={root}
       className="flex flex-1 flex-col justify-center gap-2.5 sm:gap-4 split:flex-row split:items-center lg:split:gap-8"
-      style={{ '--reveal': 0 } as CSSProperties}
+      style={{ '--reveal': restoredRevealed.current ? 1 : 0 } as CSSProperties}
     >
       {/* Außen: nimmt den freien Platz. Innen: wächst nur bis zu einer angenehmen Höhe. */}
       <div className="flex max-h-[32rem] flex-1 animate-enter flex-col split:max-h-none split:justify-center split:self-stretch">
@@ -150,7 +170,7 @@ export function RoundView({ round, result, settled, isLastRound, onSubmit, onSet
               <output
                 className={`text-figure-xl tabular-nums transition-colors duration-300 short:text-figure-lg ${result ? 'text-ink-3' : 'text-ink'}`}
               >
-                {formatPrice(guess)}
+                {formatPrice(result?.guess ?? guess)}
               </output>
             </div>
           )}
@@ -158,7 +178,7 @@ export function RoundView({ round, result, settled, isLastRound, onSubmit, onSet
 
         <PriceSlider
           range={range}
-          value={guess}
+          value={result?.guess ?? guess}
           onChange={changeGuess}
           reveal={result ? { actual: question.price, settled } : undefined}
         />

@@ -44,7 +44,17 @@ export function formatDeviation(deviation: number): string {
   return `${whole.format(percent)}${NBSP}%`;
 }
 
-const monthYear = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' });
+const relative = new Intl.RelativeTimeFormat('de-DE', { numeric: 'auto' });
+
+/** „gerade eben“, „vor 5 Minuten“, „vor 3 Stunden“ – für den Zeitpunkt eines Spielstands. */
+export function formatSavedAgo(savedAt: number, now: number): string {
+  const minutes = Math.floor(Math.max(0, now - savedAt) / 60_000);
+  if (minutes < 1) return 'gerade eben';
+  if (minutes < 60) return relative.format(-minutes, 'minute');
+  return relative.format(-Math.floor(minutes / 60), 'hour');
+}
+
+const monthYear =new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' });
 
 /** „2026-11“ → „November 2026“. */
 export function formatAsOf(asOf: string): string {

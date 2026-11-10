@@ -4,18 +4,26 @@ import { QUESTIONS } from '../data/questions';
 import { formatPoints } from '../game/format';
 import { ROUNDS_PER_GAME } from '../game/rounds';
 import { MAX_POINTS } from '../game/scoring';
+import type { ResumableGame } from '../game/useGame';
 import { AppHeader } from './AppHeader';
 import { Button } from './Button';
+import { ResumeCard } from './ResumeCard';
 
 interface StartScreenProps {
   best: number;
+  /** Gespeichertes Spiel, das fortgesetzt werden kann. */
+  resumable: ResumableGame | null;
   /** Beim Zurückkehren aus einem Spiel bekommt die Überschrift den Fokus. */
   focusHeading: boolean;
   onStart: () => void;
+  onResume: () => void;
+  onDiscard: () => void;
   onHelp: () => void;
 }
 
-export function StartScreen({ best, focusHeading, onStart, onHelp }: StartScreenProps) {
+export function StartScreen({ best, resumable, focusHeading, onStart, onResume, onDiscard, onHelp }: StartScreenProps) {
+  // Ein neues Spiel ersetzt ein unterbrochenes – darauf weist die Karte hin.
+  const replacesGame = resumable !== null && !resumable.finished;
   const heading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -38,6 +46,8 @@ export function StartScreen({ best, focusHeading, onStart, onHelp }: StartScreen
         </section>
 
         <div className="flex flex-col gap-3">
+          {resumable && <ResumeCard game={resumable} onResume={onResume} onDiscard={onDiscard} />}
+
           <section aria-label="Spiel wählen" className="flex flex-col gap-3">
             {/* Platzhalter: Die Tagesrunde ist beschlossen, aber noch nicht gebaut.
                 Sie ist deshalb sichtbar als „bald verfügbar“ markiert und nicht anklickbar. */}
@@ -52,10 +62,14 @@ export function StartScreen({ best, focusHeading, onStart, onHelp }: StartScreen
             <ModeCard
               icon={<IconArrowsShuffle size={24} stroke={1.75} aria-hidden="true" />}
               title="Freies Spiel"
-              description={`${ROUNDS_PER_GAME} zufällige Fragen aus ${QUESTIONS.length} Preisen.`}
+              description={
+                replacesGame
+                  ? 'Ein neues Spiel ersetzt dein unterbrochenes Spiel.'
+                  : `${ROUNDS_PER_GAME} zufällige Fragen aus ${QUESTIONS.length} Preisen.`
+              }
             >
-              <Button onClick={onStart}>
-                Freies Spiel starten
+              <Button onClick={onStart} variant={resumable ? 'secondary' : 'primary'}>
+                {replacesGame ? 'Neues Spiel starten' : 'Freies Spiel starten'}
                 <IconArrowRight size={20} stroke={2} aria-hidden="true" />
               </Button>
             </ModeCard>
