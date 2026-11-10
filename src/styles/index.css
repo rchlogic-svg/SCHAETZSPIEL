@@ -93,25 +93,33 @@
   --tone: #fb7185;
 }
 
+/*
+ * Grundregeln für Seite und Body stehen bewusst außerhalb einer @layer-Ebene:
+ * So gewinnen sie auch dann, wenn eine einbettende Umgebung (z. B. eine
+ * Vorschau) eigene Standardwerte für Farbschema, Schrift oder Hintergrund setzt.
+ */
+:root {
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  margin: 0;
+  background: var(--color-ink-950);
+  color: #f4f4f7;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
 @layer base {
-  html {
-    color-scheme: dark;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-
-  body {
-    min-height: 100dvh;
-    background: var(--color-ink-950);
-    color: #f4f4f7;
-    font-family: var(--font-sans);
-    font-optical-sizing: auto;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-tap-highlight-color: transparent;
-    overscroll-behavior: none;
-  }
-
   button,
   a {
     touch-action: manipulation;

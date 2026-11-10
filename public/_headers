@@ -1,0 +1,10 @@
+# Kopfzeilen für Cloudflare (Pages bzw. Workers mit statischen Dateien).
+# Andere Hoster ignorieren diese Datei.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Dateien unter /assets tragen einen Hash im Namen und ändern sich nie.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -10,7 +10,7 @@ export const CATEGORIES: Record<CategoryId, Category> = {
   unterwegs: { id: 'unterwegs', label: 'Unterwegs' },
   technik: { id: 'technik', label: 'Technik' },
   amtlich: { id: 'amtlich', label: 'Amtlich' },
-  luxus: { id: 'luxus', label: 'Luxus & Rekorde' },
+  luxus: { id: 'luxus', label: 'Luxus' },
 };
 
 /**
