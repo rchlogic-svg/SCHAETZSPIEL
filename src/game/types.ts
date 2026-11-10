@@ -1,3 +1,5 @@
+import type { PictogramName } from '../data/pictograms';
+
 export type CategoryId = 'alltag' | 'unterwegs' | 'technik' | 'amtlich' | 'luxus';
 
 export interface Source {
@@ -14,7 +16,8 @@ export interface PriceQuestion {
   /** Kurzname für Auswertung und Kassenbon. */
   title: string;
   category: CategoryId;
-  emoji: string;
+  /** Piktogramm, das die Frage bebildert. */
+  icon: PictogramName;
   question: string;
   /** Präzisiert, was genau gemeint ist (Variante, Tarif, Größe …). */
   detail: string;

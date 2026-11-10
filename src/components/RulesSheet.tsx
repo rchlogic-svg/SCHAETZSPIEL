@@ -1,8 +1,8 @@
+import { IconX } from '@tabler/icons-react';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { formatPoints } from '../game/format';
 import { MAX_POINTS, POINTS_PER_PERCENT, ZERO_POINTS_DEVIATION, pointsFor } from '../game/scoring';
-import { Button } from './Button';
-import { CloseIcon } from './Icons';
+import { Button, IconButton } from './Button';
 
 interface RulesSheetProps {
   open: boolean;
@@ -39,48 +39,44 @@ export function RulesSheet({ open, onClose }: RulesSheetProps) {
         if (event.target === dialog.current) onClose();
       }}
     >
-      <div className="flex flex-col gap-6 p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8">
+      <div className="flex flex-col gap-6 p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-8">
         <header className="flex items-start justify-between gap-4">
           <div>
-            <p className="label text-brand">Spielregeln</p>
-            <h2 id="rules-title" className="mt-1 text-3xl font-extrabold tracking-[-0.03em]">
+            <p className="label text-accent">Spielregeln</p>
+            <h2 id="rules-title" className="mt-1.5 text-title">
               So wird gewertet
             </h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Schließen"
-            className="grid size-10 shrink-0 place-items-center rounded-full bg-white/8 text-white/70 ring-1 ring-inset ring-white/10 hover:bg-white/14 hover:text-white"
-          >
-            <CloseIcon width={18} height={18} />
-          </button>
+          <IconButton label="Schließen" onClick={onClose} className="-mr-2 -mt-1">
+            <IconX size={22} stroke={1.75} aria-hidden="true" />
+          </IconButton>
         </header>
 
         <Rule number="1" title="Schätzen">
           Zieh den Regler auf den Preis, den du für richtig hältst. Mit − und + stellst du fein nach. Der echte
-          Preis liegt immer irgendwo auf dem Regler.
+          Preis liegt immer irgendwo auf dem Regler. Die Skala wächst nach rechts immer schneller: So passen
+          Centbeträge und Millionen auf denselben Regler.
         </Rule>
 
         <Rule number="2" title="Punkte sammeln">
           Ein Volltreffer bringt {formatPoints(MAX_POINTS)} Punkte. Jedes Prozent Abweichung kostet{' '}
           {POINTS_PER_PERCENT} Punkte – gleichmäßig, bis bei {ZERO_POINTS_DEVIATION * 100}&nbsp;% nichts mehr
           übrig ist.
-          <table className="numeric mt-4 w-full border-separate border-spacing-0 overflow-hidden rounded-2xl bg-white/5 text-left text-[0.9375rem] ring-1 ring-inset ring-white/10">
-            <thead className="label text-white/45">
+          <table className="mt-4 w-full border-separate border-spacing-0 overflow-hidden rounded-control text-left text-body tabular-nums shadow-[inset_0_0_0_1px_var(--line)]">
+            <thead className="label text-ink-3">
               <tr>
-                <th className="px-4 py-2.5 font-medium">Abweichung</th>
-                <th className="px-4 py-2.5 text-right font-medium">Punkte</th>
+                <th className="px-4 py-3 font-semibold">Abweichung</th>
+                <th className="px-4 py-3 text-right font-semibold">Punkte</th>
               </tr>
             </thead>
             <tbody>
               {EXAMPLES.map(([deviation, note]) => (
                 <tr key={deviation}>
-                  <td className="border-t border-white/8 px-4 py-2.5">
-                    <span className="font-semibold text-white">{Math.round(deviation * 100)}&nbsp;%</span>
-                    <span className="ml-2 text-white/50">{note}</span>
+                  <td className="border-t border-line px-4 py-3">
+                    <span className="font-semibold text-ink">{Math.round(deviation * 100)}&nbsp;%</span>
+                    <span className="ml-2 text-small text-ink-2">{note}</span>
                   </td>
-                  <td className="border-t border-white/8 px-4 py-2.5 text-right font-bold text-white">
+                  <td className="border-t border-line px-4 py-3 text-right font-semibold text-ink">
                     {formatPoints(pointsFor(deviation))}
                   </td>
                 </tr>
@@ -95,8 +91,8 @@ export function RulesSheet({ open, onClose }: RulesSheetProps) {
         </Rule>
 
         <Rule number="4" title="Belegte Preise">
-          Jeder Preis hat eine Quelle mit Datum. Nach jeder Runde kannst du sie direkt auf dem Preisschild
-          öffnen und nachprüfen.
+          Jeder Preis hat eine Quelle mit Datum. Nach jeder Frage und in der Auswertung kannst du sie öffnen
+          und nachprüfen.
         </Rule>
 
         <Button onClick={onClose}>Alles klar</Button>
@@ -108,12 +104,12 @@ export function RulesSheet({ open, onClose }: RulesSheetProps) {
 function Rule({ number, title, children }: { number: string; title: string; children: ReactNode }) {
   return (
     <section className="flex gap-4">
-      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand font-mono text-sm font-bold text-ink-950">
+      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-accent-soft text-small font-semibold tabular-nums text-accent">
         {number}
       </span>
       <div className="min-w-0 flex-1">
-        <h3 className="text-lg font-bold leading-8 tracking-[-0.01em]">{title}</h3>
-        <div className="mt-1 leading-relaxed text-white/65">{children}</div>
+        <h3 className="text-heading leading-8">{title}</h3>
+        <div className="mt-1 text-body text-ink-2">{children}</div>
       </div>
     </section>
   );

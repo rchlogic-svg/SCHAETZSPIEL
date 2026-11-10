@@ -3,24 +3,99 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#08080d" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#f3f4f7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0c0e12" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
     <meta
       name="description"
-      content="Schätzspiel: Was kostet das? Zehn Dinge, zehn Schätzungen – wie gut ist dein Preisgefühl?"
+      content="Schätzspiel: Was kostet das? Schätze Preise so genau wie möglich – jeder Preis ist mit Quelle und Datum belegt."
     />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Schätzspiel" />
     <meta name="format-detection" content="telephone=no" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>Schätzspiel – Was kostet das?</title>
+    <style>
+      /* Ladezustand: sichtbar, bis das Spiel gestartet ist. Farben wie im Designsystem. */
+      html {
+        background: #f3f4f7;
+        color: #434a58;
+      }
+      .boot {
+        display: grid;
+        min-height: 100dvh;
+        place-content: center;
+        justify-items: center;
+        gap: 1rem;
+        font:
+          500 1rem/1.5 ui-sans-serif,
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+        text-align: center;
+        padding: 1.5rem;
+      }
+      .boot-mark {
+        animation: boot-pulse 1.4s ease-in-out infinite;
+      }
+      .boot-notice {
+        max-width: 26rem;
+      }
+      @keyframes boot-pulse {
+        50% {
+          opacity: 0.45;
+        }
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background: #0c0e12;
+          color: #bcc3cf;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot-mark {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot" role="status">
+        <svg class="boot-mark" width="48" height="48" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="9" fill="#2545d8" />
+          <path
+            d="M9 15.2V10a1 1 0 0 1 1-1h5.2a2 2 0 0 1 1.4.6l6.6 6.6a2 2 0 0 1 0 2.8l-4.2 4.2a2 2 0 0 1-2.8 0L9.6 16.6a2 2 0 0 1-.6-1.4Z"
+            fill="#fff"
+          />
+          <circle cx="13" cy="13" r="1.7" fill="#2545d8" />
+        </svg>
+        <p id="boot-text">Schätzspiel wird geladen …</p>
+      </div>
+    </div>
+    <noscript>
+      <style>
+        #boot-text {
+          display: none;
+        }
+        .boot-mark {
+          animation: none;
+        }
+        #root .boot {
+          min-height: 0;
+          padding: 22vh 1.5rem 0;
+        }
+      </style>
+      <p class="boot boot-notice" style="min-height: 0; margin: 0 auto">
+        Das Schätzspiel braucht JavaScript. Bitte schalte es in den Einstellungen deines Browsers ein und lade die
+        Seite neu.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

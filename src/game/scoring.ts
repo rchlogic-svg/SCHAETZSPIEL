@@ -1,3 +1,4 @@
+import type { PictogramName } from '../data/pictograms';
 import type { Direction, Rating, RoundResult } from './types';
 
 /** Punkte für eine exakte Schätzung. */
@@ -72,17 +73,17 @@ export function totalPoints(results: readonly RoundResult[]): number {
 
 export interface Rank {
   title: string;
-  emoji: string;
+  icon: PictogramName;
   line: string;
 }
 
 const RANKS: ReadonlyArray<readonly [number, Rank]> = [
-  [0.9, { title: 'Preis-Orakel', emoji: '🔮', line: 'Unheimlich. Arbeitest du heimlich im Einkauf?' }],
-  [0.8, { title: 'Preis-Profi', emoji: '🏆', line: 'Dir macht an der Kasse so schnell niemand etwas vor.' }],
-  [0.65, { title: 'Schnäppchenjäger', emoji: '🎯', line: 'Starkes Preisgefühl – da fehlt nicht mehr viel.' }],
-  [0.5, { title: 'Solides Bauchgefühl', emoji: '👍', line: 'Ordentlich! Mit etwas Übung geht da noch mehr.' }],
-  [0.35, { title: 'Schätz-Azubi', emoji: '🌱', line: 'Der Anfang ist gemacht. Die nächste Runde wird besser.' }],
-  [0, { title: 'Glücksritter', emoji: '🎲', line: 'Mutig geschätzt! Probier es gleich noch einmal.' }],
+  [0.9, { title: 'Preis-Orakel', icon: 'crystal-ball', line: 'Unheimlich. Arbeitest du heimlich im Einkauf?' }],
+  [0.8, { title: 'Preis-Profi', icon: 'trophy', line: 'Dir macht an der Kasse so schnell niemand etwas vor.' }],
+  [0.65, { title: 'Schnäppchenjäger', icon: 'target', line: 'Starkes Preisgefühl – da fehlt nicht mehr viel.' }],
+  [0.5, { title: 'Solides Bauchgefühl', icon: 'thumb-up', line: 'Ordentlich! Mit etwas Übung geht da noch mehr.' }],
+  [0.35, { title: 'Schätz-Azubi', icon: 'seedling', line: 'Der Anfang ist gemacht. Die nächste Runde wird besser.' }],
+  [0, { title: 'Glücksritter', icon: 'dice', line: 'Mutig geschätzt! Probier es gleich noch einmal.' }],
 ];
 
 /** Titel für das Gesamtergebnis, abhängig vom Anteil der erreichten Punkte. */

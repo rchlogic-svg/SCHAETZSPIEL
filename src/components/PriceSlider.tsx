@@ -1,12 +1,4 @@
-import { motion, useTransform, type MotionValue } from 'motion/react';
-import {
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type KeyboardEvent,
-  type PointerEvent,
-} from 'react';
+import { useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
 import { formatAxis, formatPrice } from '../game/format';
 import { nudgeValue, positionToValue, snapValue, ticksFor, valueToPosition } from '../game/scale';
 import type { SliderRange } from '../game/types';
@@ -14,8 +6,6 @@ import type { SliderRange } from '../game/types';
 export interface SliderReveal {
   /** Der echte Preis. */
   actual: number;
-  /** Läuft von 0 nach 1, während der echte Preis enthüllt wird. */
-  progress: MotionValue<number>;
   settled: boolean;
 }
 
@@ -23,20 +13,28 @@ interface PriceSliderProps {
   range: SliderRange;
   value: number;
   onChange: (value: number) => void;
-  /** Gesetzt, sobald die Schätzung abgegeben ist – der Slider ist dann gesperrt. */
+  /**
+   * Gesetzt, sobald der Tipp abgegeben ist – der Regler ist dann gesperrt und
+   * zeigt Tipp und echten Preis. Wie weit die Enthüllung ist, liest er aus der
+   * CSS-Variable `--reveal` (0–1), die die Runde auf einem Elternelement setzt.
+   */
   reveal?: SliderReveal;
 }
 
 /** Trifft der Finger den Griff in diesem Umkreis (px), springt er beim Anfassen nicht. */
-const GRAB_RADIUS = 30;
+const GRAB_RADIUS = 32;
 
 /** Beschriftete Marken halten diesen Abstand zu den Rändern und zueinander. */
-const LABEL_GAP = 0.17;
+const LABEL_GAP = 0.22;
+
+/** Auflösung des unsichtbaren Standard-Reglers für Tastatur und Screenreader. */
+const STEPS = 1000;
 
 const percent = (position: number) => `${position * 100}%`;
 
 export function PriceSlider({ range, value, onChange, reveal }: PriceSliderProps) {
   const rail = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
   const grabOffset = useRef(0);
   const [dragging, setDragging] = useState(false);
 
@@ -75,6 +73,8 @@ export function PriceSlider({ range, value, onChange, reveal }: PriceSliderProps
     grabOffset.current = Math.abs(distance) <= GRAB_RADIUS ? distance : 0;
     setDragging(true);
     moveToPointer(event.clientX);
+    // Danach lässt sich mit den Pfeiltasten weiterstellen.
+    input.current?.focus({ preventScroll: true });
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -84,8 +84,7 @@ export function PriceSlider({ range, value, onChange, reveal }: PriceSliderProps
 
   const endDrag = () => setDragging(false);
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (locked) return;
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     const fine = event.shiftKey;
     switch (event.key) {
       case 'ArrowRight':
@@ -117,81 +116,106 @@ export function PriceSlider({ range, value, onChange, reveal }: PriceSliderProps
   };
 
   const actualPosition = reveal ? valueToPosition(reveal.actual, range) : position;
+  const travel = actualPosition - position;
   const guessIsLeft = position <= actualPosition;
 
   return (
-    <div className="select-none">
+    <div className="slider @container select-none">
       <div
-        role="slider"
-        tabIndex={locked ? -1 : 0}
-        aria-label="Deine Schätzung"
-        aria-orientation="horizontal"
-        aria-valuemin={range.min}
-        aria-valuemax={range.max}
-        aria-valuenow={value}
-        aria-valuetext={formatPrice(value)}
-        aria-disabled={locked}
-        className="relative h-12 touch-none rounded-full"
+        data-testid="slider-track"
+        className={`relative h-12 touch-none roomy:h-14 ${locked ? '' : 'cursor-pointer'}`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         onLostPointerCapture={endDrag}
-        onKeyDown={handleKeyDown}
       >
-        {/* Schiene: optisch etwas breiter als der Wertebereich, damit der Griff nie übersteht. */}
-        <div className="absolute inset-x-2 top-1/2 h-3 -translate-y-1/2 overflow-hidden rounded-full bg-white/12">
+        {/* Standard-Regler des Browsers: unsichtbar, aber die verlässliche Grundlage
+            für Tastatur und Screenreader (z. B. VoiceOver auf dem iPhone). */}
+        <input
+          ref={input}
+          type="range"
+          className="sr-only"
+          min={0}
+          max={STEPS}
+          step={1}
+          value={Math.round(position * STEPS)}
+          onChange={(event) => moveTo(Number(event.target.value) / STEPS)}
+          onKeyDown={handleKeyDown}
+          disabled={locked}
+          aria-label="Dein Tipp"
+          aria-valuetext={formatPrice(value)}
+        />
+
+        {/* Schiene: optisch etwas länger als der Wertebereich, damit der Griff nie übersteht. */}
+        <div className="absolute inset-x-3 top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-full bg-surface-3 shadow-[inset_0_0_0_1px_var(--control)]">
           <div className="absolute inset-x-2 inset-y-0">
             <div
-              className={`absolute inset-y-0 -left-2 bg-linear-to-r from-accent to-brand transition-opacity duration-500 ${
-                locked ? 'opacity-25' : 'opacity-100'
-              }`}
+              className={`absolute inset-y-0 -left-2 transition-colors duration-300 ${locked ? 'bg-control' : 'bg-accent'}`}
               style={{ width: `calc(${percent(position)} + 0.5rem)` }}
             />
             {reveal && (
-              <RevealGap from={position} to={actualPosition} progress={reveal.progress} settled={reveal.settled} />
+              // Strecke zwischen Tipp und echtem Preis; wächst mit der Enthüllung.
+              <div
+                className={`absolute inset-y-0 w-full origin-left transition-colors duration-300 ${
+                  reveal.settled ? 'bg-tone' : 'bg-ink-3'
+                }`}
+                style={{ left: percent(position), transform: `scaleX(calc(${travel} * var(--reveal, 0)))` }}
+              />
             )}
           </div>
         </div>
 
-        <div ref={rail} className="pointer-events-none absolute inset-x-4 inset-y-0">
+        <div ref={rail} className="pointer-events-none absolute inset-x-5 inset-y-0">
+          {/* Teilstriche wie auf einem Lineal, unter der Schiene. */}
           {ticks.map((tick) => (
             <span
               key={tick.value}
-              className={`absolute top-1/2 w-px -translate-x-1/2 -translate-y-1/2 rounded-full ${
-                tick.major ? 'h-3 bg-white/45' : 'h-1.5 bg-white/25'
+              className={`absolute top-[calc(50%+0.5rem)] w-px -translate-x-1/2 ${
+                tick.major ? 'h-2 bg-control' : 'h-1 bg-line-strong'
               }`}
               style={{ left: percent(tick.position) }}
             />
           ))}
 
           {/* Griff – nach der Abgabe schrumpft er zur Markierung „Du“. */}
-          <div
-            className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white transition-[width,height,box-shadow] duration-300 ease-out ${
+          <span
+            className={`slider-thumb absolute top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full transition-[width,height,scale,box-shadow,background-color] duration-200 ease-out ${
               locked
-                ? 'size-4 shadow-[0_0_0_4px_var(--color-ink-900)]'
+                ? 'size-4 bg-ink shadow-[0_0_0_3px_var(--surface)]'
                 : dragging
-                  ? 'size-9 shadow-[0_0_0_10px_rgb(255_255_255/0.14),0_6px_16px_rgb(0_0_0/0.5)]'
-                  : 'size-8 shadow-[0_0_0_5px_rgb(255_255_255/0.1),0_6px_16px_rgb(0_0_0/0.5)]'
+                  ? 'size-10 scale-110 bg-white shadow-[0_0_0_2px_var(--accent),0_0_0_10px_color-mix(in_srgb,var(--accent)_20%,transparent)]'
+                  : 'size-10 bg-white shadow-[0_0_0_2px_var(--accent),0_2px_8px_rgb(14_17_22/0.22)]'
             }`}
             style={{ left: percent(position) }}
           >
-            {!locked && <span className="absolute inset-0 m-auto size-2.5 rounded-full bg-ink-950" />}
-          </div>
+            {!locked && <span className="size-2.5 rounded-full bg-accent" />}
+          </span>
 
-          {reveal && <RevealMarker from={position} to={actualPosition} progress={reveal.progress} />}
+          {reveal && (
+            // Markierung des echten Preises: startet auf dem Tipp und wandert zum Ziel.
+            <span
+              className="absolute top-1/2 size-0"
+              style={{ left: `calc((${position} + ${travel} * var(--reveal, 0)) * 100%)` }}
+            >
+              <span className="absolute -left-2.5 -top-2.5 size-5 rotate-45 animate-pop rounded-[0.3rem] bg-tone shadow-[0_0_0_3px_var(--surface)] transition-colors duration-300" />
+            </span>
+          )}
         </div>
       </div>
 
       {/* Skala bzw. nach der Auflösung die Beschriftung der beiden Markierungen. */}
-      <div className="label relative mx-4 h-5 text-white/45">
+      <div className="relative mx-5 h-6 text-small tabular-nums text-ink-3" aria-hidden="true">
         {reveal ? (
           <>
-            <span className="absolute top-1 whitespace-nowrap text-white/80" style={markerLabel(position, guessIsLeft, actualPosition)}>
+            <span
+              className="absolute top-0.5 whitespace-nowrap font-semibold text-ink"
+              style={markerLabel(position, guessIsLeft, actualPosition)}
+            >
               Du
             </span>
             <span
-              className={`absolute top-1 whitespace-nowrap text-tone transition-opacity duration-300 ${
+              className={`absolute top-0.5 whitespace-nowrap font-semibold text-tone transition-opacity duration-300 ${
                 reveal.settled ? 'opacity-100' : 'opacity-0'
               }`}
               style={markerLabel(actualPosition, !guessIsLeft, position)}
@@ -201,13 +225,18 @@ export function PriceSlider({ range, value, onChange, reveal }: PriceSliderProps
           </>
         ) : (
           <>
-            <span className="absolute left-0 top-1 -translate-x-2">{formatAxis(range.min)}</span>
+            <span className="absolute left-0 top-0.5 -translate-x-2 whitespace-nowrap">{formatAxis(range.min)}</span>
             {labelledTicks.map((tick) => (
-              <span key={tick.value} className="absolute top-1 -translate-x-1/2" style={{ left: percent(tick.position) }}>
+              // Zwischenwerte nur, wenn genug Platz ist – auch bei vergrößerter Schrift.
+              <span
+                key={tick.value}
+                className="absolute top-0.5 hidden -translate-x-1/2 whitespace-nowrap @min-[19rem]:block"
+                style={{ left: percent(tick.position) }}
+              >
                 {formatAxis(tick.value)}
               </span>
             ))}
-            <span className="absolute right-0 top-1 translate-x-2">{formatAxis(range.max)}</span>
+            <span className="absolute right-0 top-0.5 translate-x-2 whitespace-nowrap">{formatAxis(range.max)}</span>
           </>
         )}
       </div>
@@ -226,38 +255,4 @@ function markerLabel(position: number, isLeft: boolean, other: number): CSSPrope
   return isLeft
     ? { right: percent(1 - position), paddingRight: '0.75rem' }
     : { left: percent(position), paddingLeft: '0.75rem' };
-}
-
-interface RevealMotionProps {
-  from: number;
-  to: number;
-  progress: MotionValue<number>;
-}
-
-/** Farbige Strecke zwischen Schätzung und echtem Preis, wächst mit der Enthüllung. */
-function RevealGap({ from, to, progress, settled }: RevealMotionProps & { settled: boolean }) {
-  const scaleX = useTransform(progress, (p) => (to - from) * p);
-  return (
-    <motion.div
-      className={`absolute inset-y-0 w-full origin-left transition-colors duration-500 ${
-        settled ? 'bg-tone' : 'bg-white/70'
-      }`}
-      style={{ left: percent(from), scaleX }}
-    />
-  );
-}
-
-/** Markierung des echten Preises: startet auf der Schätzung und wandert zum Ziel. */
-function RevealMarker({ from, to, progress }: RevealMotionProps) {
-  const left = useTransform(progress, (p) => percent(from + (to - from) * p));
-  return (
-    <motion.div className="absolute top-1/2 size-0" style={{ left }}>
-      <motion.div
-        className="absolute -left-3 -top-3 size-6 rotate-45 rounded-md bg-tone shadow-[0_0_0_4px_var(--color-ink-900),0_0_22px_var(--tone)] transition-colors duration-500"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 22, delay: 0.1 }}
-      />
-    </motion.div>
-  );
 }

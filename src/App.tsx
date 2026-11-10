@@ -1,7 +1,6 @@
-import { AnimatePresence, MotionConfig } from 'motion/react';
-import { useEffect } from 'react';
-import { Backdrop, type Mood } from './components/Backdrop';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameScreen } from './components/GameScreen';
+import { RulesSheet } from './components/RulesSheet';
 import { StartScreen } from './components/StartScreen';
 import { SummaryScreen } from './components/SummaryScreen';
 import { useGame } from './game/useGame';
@@ -9,7 +8,18 @@ import { useGame } from './game/useGame';
 export function App() {
   const game = useGame();
   const playing = game.phase === 'guessing' || game.phase === 'revealed';
-  const mood: Mood = playing && game.round ? game.round.question.category : 'brand';
+
+  // Die Spielregeln lassen sich von jedem Bildschirm aus öffnen.
+  const [rulesOpen, setRulesOpen] = useState(false);
+  const openRules = useCallback(() => setRulesOpen(true), []);
+  const closeRules = useCallback(() => setRulesOpen(false), []);
+
+  // Beim allerersten Laden bleibt der Fokus, wo der Browser ihn setzt. Danach
+  // bekommt bei jedem Bildschirmwechsel die neue Überschrift den Fokus.
+  const firstScreen = useRef(true);
+  useEffect(() => {
+    firstScreen.current = false;
+  }, []);
 
   // Jeder Bildschirm beginnt oben – wichtig nach der scrollbaren Auswertung.
   useEffect(() => {
@@ -17,25 +27,29 @@ export function App() {
   }, [game.phase === 'summary', playing]);
 
   return (
-    // „reducedMotion=user“ respektiert die Systemeinstellung „Bewegung reduzieren“.
-    <MotionConfig reducedMotion="user">
-      <Backdrop mood={mood} />
-      <AnimatePresence mode="wait">
-        {game.phase === 'start' && <StartScreen key="start" best={game.best} onStart={game.start} />}
-        {playing && <GameScreen key="game" game={game} />}
-        {game.phase === 'summary' && (
-          <SummaryScreen
-            key="summary"
-            rounds={game.rounds}
-            results={game.results}
-            total={game.total}
-            previousBest={game.previousBest}
-            isNewBest={game.isNewBest}
-            onReplay={game.start}
-            onHome={game.home}
-          />
-        )}
-      </AnimatePresence>
-    </MotionConfig>
+    <>
+      {game.phase === 'start' && (
+        <StartScreen
+          best={game.best}
+          focusHeading={!firstScreen.current}
+          onStart={game.start}
+          onHelp={openRules}
+        />
+      )}
+      {playing && <GameScreen game={game} onHelp={openRules} />}
+      {game.phase === 'summary' && (
+        <SummaryScreen
+          rounds={game.rounds}
+          results={game.results}
+          total={game.total}
+          previousBest={game.previousBest}
+          isNewBest={game.isNewBest}
+          onReplay={game.start}
+          onHome={game.home}
+          onHelp={openRules}
+        />
+      )}
+      <RulesSheet open={rulesOpen} onClose={closeRules} />
+    </>
   );
 }

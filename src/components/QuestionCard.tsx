@@ -1,134 +1,110 @@
-import { motion, useMotionValueEvent, type MotionValue } from 'motion/react';
-import { useLayoutEffect, useRef } from 'react';
+import { IconExternalLink } from '@tabler/icons-react';
+import { useEffect, useRef, type Ref } from 'react';
 import { CATEGORIES } from '../data/questions';
 import { formatAsOf, formatPrice } from '../game/format';
 import { roundToSignificant } from '../game/scale';
 import type { PriceQuestion } from '../game/types';
-import { setDigits } from './Digits';
-import { ExternalIcon } from './Icons';
+import type { Signal } from '../lib/tween';
+import { PictogramTile } from './Pictogram';
 
 export interface CardReveal {
   guess: number;
-  /** Läuft von 0 nach 1, während der Preis von der Schätzung zum echten Wert zählt. */
-  progress: MotionValue<number>;
+  /** Läuft von 0 nach 1, während der Preis vom Tipp zum echten Wert zählt. */
+  progress: Signal;
   settled: boolean;
 }
 
 interface QuestionCardProps {
   question: PriceQuestion;
-  /** Laufende Nummer, z. B. „03/10“. */
-  counter: string;
+  /** Die Frage ist die Hauptüberschrift des Spielbildschirms. */
+  headingRef?: Ref<HTMLHeadingElement>;
   reveal?: CardReveal;
 }
 
-/** Die Frage als Preisschild: oben gelocht, unten der Abschnitt mit dem Preis. */
-export function QuestionCard({ question, counter, reveal }: QuestionCardProps) {
+/**
+ * Die Frage als Preisschild: oben gelocht, unten – hinter der Abrisskante –
+ * der Abschnitt, auf dem nach dem Tipp der echte Preis erscheint.
+ */
+export function QuestionCard({ question, headingRef, reveal }: QuestionCardProps) {
   return (
-    <div className="tag-shadow flex flex-1 flex-col">
-      <article className="tag relative flex flex-1 flex-col" data-category={question.category}>
-        <span className="tag-eyelet" aria-hidden="true" />
+    <article className="tag flex flex-1 flex-col">
+      <span className="tag-hole" aria-hidden="true" />
 
-        <header className="flex shrink-0 items-center justify-between px-5 pt-3.5 short:px-4 short:pt-2.5">
-          <span className="label rounded-full bg-accent-ink/10 px-2.5 py-1 text-accent-ink">
-            {CATEGORIES[question.category].label}
-          </span>
-          <span className="label text-paper-muted">{counter}</span>
-        </header>
-
-        <div className="flex flex-1 flex-col items-center justify-center gap-[clamp(0.5rem,1.8dvh,1.25rem)] px-6 py-2 text-center short:flex-row short:gap-3.5 short:px-4 short:py-2 short:text-left">
-          <motion.div
-            aria-hidden="true"
-            className="grid size-[clamp(3.75rem,11dvh,7.5rem)] shrink-0 place-items-center rounded-[28%] bg-linear-to-br from-accent/30 to-accent-2/30 text-[clamp(2.1rem,6.4dvh,4.4rem)] leading-none short:size-14 short:text-[2rem]"
-            initial={{ scale: 0.4, rotate: -14 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 15, delay: 0.18 }}
-          >
-            <motion.span
-              className="block"
-              animate={{ y: [0, -5, 0] }}
-              transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-            >
-              {question.emoji}
-            </motion.span>
-          </motion.div>
-
-          <div className="min-w-0">
-            <h2 className="text-balance text-[clamp(1.3rem,5.4vw,2rem)] font-bold leading-[1.1] tracking-[-0.025em] short:text-[1.2rem] wide:text-[clamp(1.5rem,2.6vw,2.25rem)] short:wide:text-[1.2rem]">
+      <div className="flex flex-1 items-center px-5 pb-3.5 pt-8 short:px-4 short:pb-2 short:pt-7 roomy:px-8 roomy:pb-6 roomy:pt-12">
+        <div className="flex w-full items-start gap-4 roomy:flex-col roomy:items-center roomy:gap-5 roomy:text-center">
+          <PictogramTile name={question.icon} className="w-14 short:w-12 roomy:w-24" />
+          <div className="min-w-0 flex-1">
+            <p className="label text-ink-3">{CATEGORIES[question.category].label}</p>
+            <h1 ref={headingRef} tabIndex={-1} className="mt-1.5 text-pretty text-title short:mt-1 short:text-heading roomy:text-balance">
               {question.question}
-            </h2>
-            <p className="mt-1.5 text-balance text-[0.9375rem] leading-snug text-paper-muted short:mt-1 short:text-[0.8125rem] sm:text-base short:sm:text-[0.8125rem]">
+            </h1>
+            <p className="mt-1.5 text-pretty text-small text-ink-2 short:mt-1 roomy:mt-2 roomy:text-balance roomy:text-body">
               {question.detail}
             </p>
           </div>
         </div>
+      </div>
 
-        <footer className="tag-stub flex shrink-0 flex-col items-center justify-center gap-1 text-center">
-          {reveal ? (
-            <RevealedPrice actual={question.price} reveal={reveal} />
-          ) : (
-            <p className="flex gap-2 text-4xl font-extrabold leading-none text-paper-line short:text-3xl" aria-hidden="true">
-              {[0, 1, 2].map((dot) => (
-                <span key={dot} className="animate-[pulse-soft_1.6s_ease-in-out_infinite]" style={{ animationDelay: `${dot * 0.2}s` }}>
-                  ?
-                </span>
-              ))}
-            </p>
-          )}
+      <footer className="tag-stub flex shrink-0 flex-col items-center pb-1.5 pt-3 text-center short:pb-0.5 short:pt-2 roomy:pb-3 roomy:pt-5">
+        {reveal ? (
+          <RevealedPrice actual={question.price} reveal={reveal} />
+        ) : (
+          <p className="text-figure-lg tracking-[0.12em] text-line-strong" aria-hidden="true">
+            ???
+          </p>
+        )}
 
-          {reveal?.settled ? (
-            <motion.p
-              className="line-clamp-2 max-w-full px-1 font-mono text-[0.6875rem] leading-tight text-paper-muted short:line-clamp-1"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-            >
+        {/* Diese Zeile behält ihre Höhe, damit beim Aufdecken nichts springt. */}
+        {reveal?.settled ? (
+          <a
+            href={question.source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-0.5 flex min-h-11 max-w-full animate-fade items-center rounded-control px-3 py-1 text-small text-ink-2 transition-colors duration-150 hover:bg-surface-2"
+          >
+            <span className="text-balance">
               Quelle:{' '}
-              <a
-                href={question.source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-paper-ink underline decoration-paper-line decoration-2 underline-offset-2 hover:decoration-accent-ink"
-              >
+              <span className="font-semibold text-ink underline decoration-line-strong decoration-1 underline-offset-[3px]">
                 {question.source.name}
-                <ExternalIcon width={11} height={11} className="ml-0.5 inline-block align-[-1px]" />
-              </a>{' '}
-              · Stand: {formatAsOf(question.source.asOf)}
-            </motion.p>
-          ) : (
-            <p className="label text-paper-muted">Echter Preis</p>
-          )}
-        </footer>
-      </article>
-    </div>
+              </span>{' '}
+              · Stand {formatAsOf(question.source.asOf)}
+              <IconExternalLink size={15} stroke={1.75} className="ml-1 inline-block align-[-2px]" aria-hidden="true" />
+            </span>
+            <span className="sr-only">(öffnet die Quelle in einem neuen Tab)</span>
+          </a>
+        ) : (
+          <p className="mt-0.5 flex min-h-11 items-center text-small text-ink-3">
+            {reveal ? 'Der echte Preis ist …' : 'Der echte Preis erscheint nach deinem Tipp'}
+          </p>
+        )}
+      </footer>
+    </article>
   );
 }
 
-/** Zählt sichtbar von der Schätzung zum echten Preis und „stempelt“ ihn am Ende ein. */
+/** Zählt sichtbar vom Tipp zum echten Preis. */
 function RevealedPrice({ actual, reveal }: { actual: number; reveal: CardReveal }) {
   const node = useRef<HTMLSpanElement>(null);
   const { guess, progress, settled } = reveal;
 
-  const render = (p: number) => {
-    if (!node.current) return;
-    // Geometrisch interpolieren – passt zur logarithmischen Skala des Sliders.
-    const value = p >= 1 ? actual : roundToSignificant(guess * Math.pow(actual / guess, p), 3, 'round');
-    setDigits(node.current, formatPrice(value));
-  };
-
-  useMotionValueEvent(progress, 'change', render);
-  useLayoutEffect(() => render(progress.get()));
+  useEffect(() => {
+    const render = (p: number) => {
+      if (!node.current) return;
+      // Geometrisch interpolieren – passt zur logarithmischen Skala des Reglers.
+      const value = p >= 1 ? actual : roundToSignificant(guess * Math.pow(actual / guess, p), 3, 'round');
+      node.current.textContent = formatPrice(value);
+    };
+    render(progress.get());
+    return progress.subscribe(render);
+  }, [actual, guess, progress]);
 
   return (
-    <motion.p
-      className="text-[clamp(1.9rem,8.5vw,2.75rem)] font-extrabold leading-none tracking-[-0.03em] short:text-3xl wide:text-[2.75rem]"
-      animate={settled ? { scale: [1, 1.16, 1], color: ['#16141d', 'var(--accent-ink)', '#16141d'] } : { scale: 1 }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-    >
+    <p className={`text-figure-lg tabular-nums ${settled ? 'animate-pop' : ''}`}>
       <span ref={node} aria-hidden="true" />
       {/* Für Screenreader erst vorlesen, wenn der Preis feststeht. */}
       <span className="sr-only" role="status">
         {settled ? `Echter Preis: ${formatPrice(actual)}` : ''}
       </span>
-    </motion.p>
+    </p>
   );
 }

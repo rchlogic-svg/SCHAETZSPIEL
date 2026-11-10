@@ -99,21 +99,47 @@ Empfehlung: **Cloudflare**. Einrichtung in etwa fünf Minuten:
 Danach wird jede Änderung auf dem Hauptzweig automatisch veröffentlicht. Die Tarifbedingungen
 der Anbieter ändern sich; vor dem Start lohnt ein Blick auf die aktuellen Preisseiten.
 
+## Designsystem „Papier & Tinte“
+
+Die Gestaltung ist in `src/styles/index.css` festgelegt und gilt für alle Bildschirme.
+Komponenten verwenden nur diese Bausteine – keine eigenen Farben oder Größen.
+
+| Baustein        | Regel                                                                                       |
+| --------------- | ------------------------------------------------------------------------------------------- |
+| Farben          | Ruhige Flächen, schwarze Tinte, eine Akzentfarbe (Stempelblau). Farbe hat immer Bedeutung: Blau = Aktion, Grün/Ocker/Rot = Bewertung eines Tipps. |
+| Hell und dunkel | Folgt der Systemeinstellung. Jedes Textpaar erfüllt WCAG AA (mindestens 4,5:1).             |
+| Schrift         | Instrument Sans mit Tabellenziffern. Sieben Größen: `display`, `title`, `heading`, `body-lg`, `body`, `small`, `label`; für Zahlen `figure-xl` und `figure-lg`. |
+| Radien          | Drei Stufen: `chip`, `control`, `card`.                                                     |
+| Tippflächen     | Mindestens 44 × 44 px.                                                                      |
+| Piktogramme     | Einfarbige Liniensymbole statt Emoji (Tabler Icons, MIT-Lizenz).                            |
+| Bewegung        | Eine Kurve, kurze Einblendungen. Einziger Höhepunkt: Der echte Preis zählt hoch. Bei „Bewegung reduzieren“ entfällt alles. |
+| Erkennungszeichen | Das Preisschild mit Lochung und Abrisskante – sonst keine Dekoration.                     |
+
+**Neues Piktogramm für eine Frage:** Namen in `src/data/pictograms.ts` ergänzen und in
+`src/components/Pictogram.tsx` einem Symbol zuordnen. TypeScript meldet, wenn eines von beiden fehlt.
+
+**Platzhalter:** Die Tagesrunde (Startseite) und der Ton-Schalter (oben rechts) sind gestaltet, aber
+noch ohne Funktion. Beide sind sichtbar als nicht verfügbar gekennzeichnet.
+
 ## Aufbau
 
 ```
 src/
   data/questions.ts      Fragen mit Preis, Quelle und Stand
+  data/pictograms.ts     Namen der erlaubten Piktogramme
   game/                  Spiellogik ohne Oberfläche – vollständig getestet
     scoring.ts           Abweichung, Punkte, Bewertungsstufen, Titel
     scale.ts             Reglerbereich, logarithmische Skala, glatte Beträge
     rounds.ts            Auswahl der Fragen für ein Spiel
     game.ts              Spielablauf (Start → Schätzen → Auflösung → Auswertung)
+    labels.ts            Texte zur Bewertung, Signalfarbe, Text zum Teilen
+    summary.ts           Höhepunkte eines Spiels (bester Tipp, größter Ausreißer)
     format.ts            Preise, Punkte und Datum in deutscher Schreibweise
     storage.ts           Bestwert und gesehene Fragen im Browser
+  lib/                   Kleine Hilfen: Animation, „Bewegung reduzieren“, Vibration
   components/            Oberfläche: Start, Spielrunde, Regler, Preisschild, Auswertung
-  styles/index.css       Farben, Schriften und die Formen von Preisschild und Kassenbon
+  styles/index.css       Designsystem: Farben, Schrift, Radien, Bewegung, Preisschild
 ```
 
-Technik: React, TypeScript, Vite, Tailwind CSS und Motion für Animationen. Die Schriften
-(Bricolage Grotesque, Geist Mono) liegen im Projekt und werden nicht von fremden Servern geladen.
+Technik: React, TypeScript, Vite und Tailwind CSS. Animationen kommen ohne Bibliothek aus.
+Die Schrift (Instrument Sans) liegt im Projekt und wird nicht von fremden Servern geladen.

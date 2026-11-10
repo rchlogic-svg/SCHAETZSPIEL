@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ROUNDS_PER_GAME } from '../game/rounds';
 import { MIN_PRICE } from '../game/scale';
+import { PICTOGRAMS } from './pictograms';
 import { CATEGORIES, QUESTIONS } from './questions';
 
 describe('Fragenkatalog', () => {
@@ -29,7 +30,7 @@ describe('Fragenkatalog', () => {
       expect(Number.isFinite(question.price)).toBe(true);
       expect(question.price).toBeGreaterThanOrEqual(MIN_PRICE);
 
-      expect(question.emoji.trim()).not.toBe('');
+      expect(PICTOGRAMS).toContain(question.icon);
       expect(question.question.trim().endsWith('?')).toBe(true);
       expect(question.question.length).toBeLessThanOrEqual(60);
       expect(question.detail.trim()).not.toBe('');

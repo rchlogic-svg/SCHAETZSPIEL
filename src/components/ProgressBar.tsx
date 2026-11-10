@@ -1,3 +1,4 @@
+import { toneFor } from '../game/labels';
 import type { RoundResult } from '../game/types';
 
 interface ProgressBarProps {
@@ -8,32 +9,30 @@ interface ProgressBarProps {
   results: readonly RoundResult[];
 }
 
-/** Ein Segment pro Runde; aufgelöste Runden tragen die Farbe ihrer Bewertung. */
+/**
+ * Ein Segment pro Frage: erledigte tragen die Signalfarbe ihrer Bewertung,
+ * die laufende ist schwarz, kommende sind blass. Den genauen Stand nennt
+ * zusätzlich der Text „Frage x von y“ daneben.
+ */
 export function ProgressBar({ roundCount, current, results }: ProgressBarProps) {
   return (
     <div
-      className="flex flex-1 items-center gap-1 sm:gap-1.5"
+      className="flex items-center gap-1"
       role="progressbar"
       aria-label="Spielfortschritt"
       aria-valuemin={1}
       aria-valuemax={roundCount}
       aria-valuenow={current + 1}
-      aria-valuetext={`Runde ${current + 1} von ${roundCount}`}
+      aria-valuetext={`Frage ${current + 1} von ${roundCount}`}
     >
       {Array.from({ length: roundCount }, (_, index) => {
         const result = results[index];
-        const state = result ? 'done' : index === current ? 'current' : 'upcoming';
+        const color = result ? 'bg-tone' : index === current ? 'bg-ink' : 'bg-line-strong';
         return (
           <span
             key={index}
-            data-rating={result?.rating}
-            className={`h-1.5 flex-1 rounded-full transition-colors duration-500 ${
-              state === 'done'
-                ? 'bg-tone'
-                : state === 'current'
-                  ? 'animate-[pulse-soft_1.8s_ease-in-out_infinite] bg-white'
-                  : 'bg-white/15'
-            }`}
+            data-tone={result ? toneFor(result.rating) : undefined}
+            className={`h-1.5 min-w-1 flex-1 rounded-full transition-colors duration-300 ${color}`}
           />
         );
       })}
